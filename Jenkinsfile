@@ -5,6 +5,10 @@ pipeline {
         nodejs 'node20'
     }
 
+    environment {
+        IMAGE_NAME = 'zoya9545/cloudbridge-app:v1'
+    }
+
     stages {
         stage('Checkout Code') {
             steps {
@@ -23,6 +27,29 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t cloudbridge-app:v1 .'
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                sh 'docker tag cloudbridge-app:v1 $IMAGE_NAME'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push $IMAGE_NAME
+                    '''
+                }
             }
         }
     }
