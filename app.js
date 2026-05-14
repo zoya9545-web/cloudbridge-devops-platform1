@@ -22,7 +22,7 @@ app.get("/users", (req, res) => {
 
 // Root endpoint
 app.get("/", (req, res) => {
-  res.send("Welcome to CloudBridge DevOps Platform");
+  res.send("Welcome to CloudBridge DevOps Platform - Version 2");
 });
 
 const PORT = process.env.PORT || 3000;
