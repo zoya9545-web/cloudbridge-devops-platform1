@@ -1,5 +1,9 @@
-kpipeline {
+pipeline {
     agent any
+
+    tools {
+        nodejs 'node20'
+    }
 
     stages {
         stage('Checkout Code') {
@@ -10,6 +14,8 @@ kpipeline {
 
         stage('Install Dependencies') {
             steps {
+                sh 'node -v'
+                sh 'npm -v'
                 sh 'npm install'
             }
         }
@@ -22,7 +28,16 @@ kpipeline {
 
         stage('Push Docker Image') {
             steps {
-                sh 'docker push zoya9545/cloudbridge-app:v2'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push zoya9545/cloudbridge-app:v2
+                    '''
+                }
             }
         }
 
